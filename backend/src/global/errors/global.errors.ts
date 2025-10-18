@@ -1,10 +1,11 @@
+import { HttpStatus } from '@nestjs/common';
 import { HttpStatusCode } from 'axios';
 import { ExternalServiceError, MainAppError } from 'src/app.error';
 
 abstract class GlobalError extends MainAppError {
   constructor(
     message: string,
-    httpCode: HttpStatusCode,
+    httpCode: HttpStatus,
     httpTrace: string,
     externalServiceError?: ExternalServiceError,
   ) {
@@ -14,7 +15,7 @@ abstract class GlobalError extends MainAppError {
 
 export class ValidationAppError extends GlobalError {
   constructor(message: string) {
-    super(message, HttpStatusCode.BadRequest, 'VALIDATION_ERROR');
+    super(message, HttpStatus.BAD_REQUEST, 'VALIDATION_ERROR');
   }
 }
 
@@ -24,7 +25,7 @@ export class UnknownInternalError extends GlobalError {
   ) {
     super(
       message,
-      HttpStatusCode.InternalServerError,
+      HttpStatus.INTERNAL_SERVER_ERROR,
       'UNKNOWN_INTERNAL_ERROR',
     );
   }

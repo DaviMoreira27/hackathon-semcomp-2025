@@ -1,7 +1,6 @@
 import { IsString, ValidateNested, IsArray, IsOptional, IsNumber, IsBoolean, isBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 
-
 class MetadataDTO {
   @IsString()
   display_phone_number: string;
@@ -249,10 +248,10 @@ export enum MessageType {
 
 export interface WhatsAppMessageMapped {
   metaMessageId: string;
-  name: string;
   phoneNumber: string;
   text?: string;
   mediaId?: string;
+  name: string;
   type: MessageType;
   sendedAt: Date;
 }
