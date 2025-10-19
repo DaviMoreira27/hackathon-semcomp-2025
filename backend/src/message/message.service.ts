@@ -1,111 +1,41 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InvalidWebhookToken, UnsupportedMessageReceived } from 'src/message/message.errors';
-import { MessageDTO, MessageType, WhatsAppMessageMapped, WhatsAppWebhookPayloadDTO } from './message.types';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class MessageService {
-  private readonly verifyToken: string;
-  public messageMap: WhatsAppMessageMapped[] = [];
-
-  constructor(
-    @Inject(ConfigService)
-    private configService: ConfigService,
-  ) {
-    this.verifyToken = this.configService.get<string>('whatsappVerifyToken')!;
-  }
-
-  validateWebhook(mode: string, challenge: string, token: string): string {
-    if (mode === 'subscribe' && token === this.verifyToken) {
-      console.log('Webhook authenticated');
-      return challenge;
-    }
-    throw new InvalidWebhookToken('VALIDATE_WEBHOOK');
-  }
-
-  async processWhatsAppMessage(payload: WhatsAppWebhookPayloadDTO) {
-    const message = await this.mapMessage(payload);
-
-    const data = {
-      text: message.text,
-      metaMessageId: message.metaMessageId,
-      mediaId: message.mediaId,
-      name: message.name,
-      type: message.type,
-      phoneNumber: message.phoneNumber,
-      sendedAt: new Date(),
-    }
-    this.messageMap.push(data);
-    console.log('Message saved', data);
-  }
-
-  private async mapMessage(payload: WhatsAppWebhookPayloadDTO) {
-    const entry = payload.entry?.[0];
-    if (!entry) {
-      console.warn('Payload does not contain any entry.');
-      throw new UnsupportedMessageReceived('MAP_MESSAGE_ENTRY');
-    }
-
-    const change = entry.changes?.[0];
-    if (!change) {
-      console.warn('Entry does not contain any changes.');
-      throw new UnsupportedMessageReceived('MAP_MESSAGE_CHANGE');
-    }
-
-    const value = change.value;
-    if (!value) {
-      console.warn('Change does not contain a value.');
-      throw new UnsupportedMessageReceived('MAP_MESSAGE_VALUE');
-    }
-
-    const contact = value.contacts?.[0];
-    const message = value.messages?.[0];
-
-    if (!message) {
-      console.warn('Value does not contain a message.');
-      throw new UnsupportedMessageReceived('MAP_MESSAGE_VALUE');
-    }
-
-    const mappedMessage: WhatsAppMessageMapped = {
-      metaMessageId: message.id,
-      name: contact.profile.name,
-      phoneNumber: message.from,
-      type: message.type as MessageType,
-      sendedAt: new Date(parseInt(message.timestamp, 10) * 1000), // The whatsApp timestamp is in Unix format
+  async monthlyReport(userId: string) {
+    // mock — troque pelos seus dados / analyzer depois
+    return {
+      text:
+        '📊 Relatório de Outubro\n' +
+        '• Total: R$ 3.240 (+6% vs. Set)\n' +
+        '• Top: Mercado 30%, Restaurantes 13%, Transporte 11%\n' +
+        'Quer *adicionar na caixinha* ou *analisar onde economizar*?',
     };
-
-    this.setMessageBody(mappedMessage, message);
-
-    return mappedMessage;
   }
 
-  private setMessageBody(mappedMessage: WhatsAppMessageMapped, receivedMessage: MessageDTO) {
-    switch (receivedMessage.type) {
-      case 'text':
-        mappedMessage.text = receivedMessage.text?.body;
-        break;
-      case 'image':
-        mappedMessage.mediaId = receivedMessage.image?.id;
-        mappedMessage.text = receivedMessage.image?.caption;
-        break;
-      case 'audio':
-        mappedMessage.mediaId = receivedMessage.audio?.id;
-        break;
-      case 'video':
-        mappedMessage.mediaId = receivedMessage.video?.id;
-        mappedMessage.text = receivedMessage.video?.caption;
-        break;
-      case 'sticker':
-        mappedMessage.mediaId = receivedMessage.sticker?.id;
-        break;
-      case 'document':
-        mappedMessage.mediaId = receivedMessage.document?.id;
-        mappedMessage.text = receivedMessage.document?.filename;
-        break;
-      case 'unsupported':
-        throw new UnsupportedMessageReceived('MESSAGE_BODY_UNSUPPORTED');
-      default:
-        throw new UnsupportedMessageReceived('MESSAGE_BODY_DEFAULT');
-    }
+  async askCategories(userId: string) {
+    return {
+      text:
+        'Quais categorias você gostaria de reduzir?\nCategorias: Mercado, Restaurantes, Transporte, Streaming, Saúde, Lazer.',
+    };
+  }
+
+  async suggestionsForCategories(userId: string, cats: string[]) {
+    const lines = cats.map((c) => `• ${c}: sugerir definir limite ou cancelar assinatura (se existir).`);
+    return { text: `Sugestões:\n${lines.join('\n')}\nDeseja criar limite ou adicionar aviso de cancelamento?` };
+  }
+
+  async createCancelAlert(userId: string, service: string) {
+    return { text: `🔔 Aviso de cancelamento criado para ${service}.` };
+  }
+
+  async createLimit(userId: string, target: string, value: number) {
+    return { text: `✅ Limite criado: ${target} = R$ ${value} (alerta 80%/100%).` };
+  }
+
+  async addToPiggy(userId: string, amount: number) {
+    // mock saldo
+    const total = 760 + amount;
+    return { text: `💰 Adicionados R$ ${amount} à caixinha. Total: R$ ${total}.` };
   }
 }

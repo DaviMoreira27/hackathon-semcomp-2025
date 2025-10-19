@@ -4,9 +4,13 @@ import { ConfigModule } from '@nestjs/config';
 import config from './config/config';
 import { HttpModule } from '@nestjs/axios';
 import { OpenaiModule } from './openai/openai.module';
+import { TelegramModule } from './telegram/telegram.module'; // ✅ já importado no topo
 
 @Module({
-  imports: [MessageModule, OpenaiModule,
+  imports: [
+    MessageModule,
+    OpenaiModule,
+    TelegramModule, // ✅ ADICIONE ESTA LINHA
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
