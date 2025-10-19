@@ -7,7 +7,7 @@ export default () => ({
 
   // WHATSAPP
   whatsappVerifyToken: process.env.WHATSAPP_VERIFY_TOKEN ?? 'APPLE',
-  whatsappAccessToken: process.env.WHATSSAP_ACCESS_TOKEN ?? 'BANANA',
+  whatsappAccessToken: process.env.WHATSAP_ACCESS_TOKEN ?? 'BANANA',
 
   // OPEN AI
   openaiModel: process.env.OPEN_AI_MODEL ?? 'gpt-4o-mini',

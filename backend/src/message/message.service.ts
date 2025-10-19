@@ -6,7 +6,7 @@ import { MessageDTO, MessageType, WhatsAppMessageMapped, WhatsAppWebhookPayloadD
 @Injectable()
 export class MessageService {
   private readonly verifyToken: string;
-  public messageMap!: WhatsAppMessageMapped[];
+  public messageMap: WhatsAppMessageMapped[] = [];
 
   constructor(
     @Inject(ConfigService)
@@ -26,7 +26,7 @@ export class MessageService {
   async processWhatsAppMessage(payload: WhatsAppWebhookPayloadDTO) {
     const message = await this.mapMessage(payload);
 
-    this.messageMap.push({
+    const data = {
       text: message.text,
       metaMessageId: message.metaMessageId,
       mediaId: message.mediaId,
@@ -34,8 +34,9 @@ export class MessageService {
       type: message.type,
       phoneNumber: message.phoneNumber,
       sendedAt: new Date(),
-    });
-    console.log('Message saved');
+    }
+    this.messageMap.push(data);
+    console.log('Message saved', data);
   }
 
   private async mapMessage(payload: WhatsAppWebhookPayloadDTO) {

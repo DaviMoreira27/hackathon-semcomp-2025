@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 @Module({
   imports: [],
   providers: [MessageService, ConfigService],
+  controllers: [MessageController],
   exports: [],
 })
 export class MessageModule {}
