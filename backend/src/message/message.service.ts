@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { BudgetService } from '../budget/budget.service';
+import { PiggyService } from '../piggy/piggy.service';
 
 @Injectable()
 export class MessageService {
