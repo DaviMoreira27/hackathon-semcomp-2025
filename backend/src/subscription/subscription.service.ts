@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Periodicity  } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import { addDays, addMonths } from 'date-fns';
 
@@ -13,7 +13,7 @@ export class SubscriptionService {
       update: {
         lastChargeDate,
         periodicityDays,
-        periodicity: Prisma.$Enums.Periodicity.MONTHLY, // << aqui
+        periodicity: Periodicity.MONTHLY, // << aqui
         isActive: true,
       },
       create: {
@@ -21,7 +21,7 @@ export class SubscriptionService {
         merchant,
         lastChargeDate,
         periodicityDays,
-        periodicity: Prisma.$Enums.Periodicity.MONTHLY, // << aqui
+        periodicity: Periodicity.MONTHLY, // << aqui
         isActive: true,
       },
     });

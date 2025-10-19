@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, AlertType  } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
 
 @Injectable()
 export class AlertService {
   constructor(private readonly prisma: PrismaService) {}
 
-  enqueue(userId: string, type: Prisma.$Enums.AlertType, payload: any, scheduledAt?: Date | null) { // << aqui
+  enqueue(userId: string, type: AlertType, payload: any, scheduledAt?: Date | null) { // << aqui
     return this.prisma.alert.create({
       data: {
         userId,

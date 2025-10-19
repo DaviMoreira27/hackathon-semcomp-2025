@@ -2,16 +2,22 @@ import { Module } from '@nestjs/common';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { TelegramUpdate } from './telegram.update';
 import { MessageModule } from '../message/message.module';
-import { ConfigModule } from '@nestjs/config';
+import { OpenaiModule } from '../openai/openai.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { StatementModule } from '../statement/statement.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    TelegrafModule.forRoot({
-      token: process.env.TELEGRAM_BOT_TOKEN!,
-      // polling é padrão; não precisamos passar launchOptions
+    TelegrafModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        token: configService.get<string>('TELEGRAM_BOT_TOKEN')!,
+      }),
+      inject: [ConfigService],
     }),
     MessageModule,
+    OpenaiModule,
+    StatementModule, // ✅ adicionado aqui (fora do forRootAsync)
   ],
   providers: [TelegramUpdate],
 })

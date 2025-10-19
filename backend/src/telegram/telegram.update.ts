@@ -1,42 +1,57 @@
+// src/telegram/telegram.update.ts
 import { Ctx, Hears, On, Start, Update } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
 import { MessageService } from '../message/message.service';
+import { OpenaiService } from '../openai/openai.service';
+import { StatementService } from '../statement/statement.service';
+import { Logger } from '@nestjs/common';
 
 @Update()
 export class TelegramUpdate {
-  constructor(private readonly messages: MessageService) {}
+  private readonly logger = new Logger(TelegramUpdate.name);
+
+  constructor(
+    private readonly messages: MessageService,
+    private readonly openaiService: OpenaiService,
+    private readonly statementService: StatementService,
+  ) {}
 
   @Start()
   async onStart(@Ctx() ctx: Context) {
     await ctx.reply(
-      'Olá! Sou seu assistente financeiro 💬\n' +
-      'Comandos: "feche meu mês", "analisar onde economizar", "guardar 60 na caixinha".'
+      'Olá! Sou seu assistente financeiro 💬\n\n' +
+      'Você pode me pedir para:\n' +
+      '• "Analise meu extrato"\n' +
+      '• "Feche meu mês"\n' +
+      '• "Analisar onde economizar"\n' +
+      '• "Guardar dinheiro no CDI"\n' +
+      '• "Limite meus gastos"\n\n' +
+      'Ou apenas converse comigo!'
     );
   }
 
-  // 1) Gatilhos ampliados para o relatório
+  // Comandos baseados em regras
   @Hears(['feche meu mês', 'feche meu mes', 'relatório', 'relatorio'])
-  @Hears(/^\s*(relat[óo]rio|feche\s+meu\s+m[eê]s)\s*$/i)
   async monthly(@Ctx() ctx: Context) {
-    console.log('>> monthly handler hit', { from: ctx.from?.id, text: (ctx.message as any)?.text });
+    // CORRIGIDO AQUI
+    this.logger.log(`Comando 'monthly' acionado por ${ctx.from?.id ?? 'ID_Desconhecido'}`);
     const r = await this.messages.monthlyReport(String(ctx.from?.id ?? 'anon'));
     await ctx.reply(r.text);
   }
 
-  // 2) Planejar economia
   @Hears(['analisar onde economizar', 'economizar'])
-  @Hears(/economizar|analisar\s+onde\s+economizar/i)
   async plan(@Ctx() ctx: Context) {
-    console.log('>> plan handler hit', { text: (ctx.message as any)?.text });
+    // CORRIGIDO AQUI
+    this.logger.log(`Comando 'plan' acionado por ${ctx.from?.id ?? 'ID_Desconhecido'}`);
     const r = await this.messages.askCategories(String(ctx.from?.id ?? 'anon'));
     await ctx.reply(r.text);
   }
 
-  // 3) Guardar na caixinha
   @Hears(/(adicionar|guardar)\s*(\d+[\.,]?\d*)\s*(na\s+caixinha|caixinha)/i)
   async piggy(@Ctx() ctx: Context) {
     const text = (ctx.message as any).text as string;
-    console.log('>> piggy match attempt', { text });
+    // CORRIGIDO AQUI
+    this.logger.log(`Comando 'piggy' acionado por ${ctx.from?.id ?? 'ID_Desconhecido'} com texto: "${text}"`);
     const m = text.match(/(\d+[\.,]?\d*)/);
     const amount = m ? Number(m[1].replace(',', '.')) : 0;
     if (!amount) return ctx.reply('Qual valor? Ex.: "adicionar 100 na caixinha"');
@@ -44,22 +59,22 @@ export class TelegramUpdate {
     await ctx.reply(r.text);
   }
 
-  // 4) Categorias (lista separada por vírgula, ponto e vírgula ou " e ")
   @Hears(/(transporte|streaming|mercado|restaurantes|sa[úu]de|lazer)/i)
   async pickCats(@Ctx() ctx: Context) {
     const raw = (ctx.message as any).text as string;
-    console.log('>> pickCats raw', { raw });
+    // CORRIGIDO AQUI
+    this.logger.log(`Comando 'pickCats' acionado por ${ctx.from?.id ?? 'ID_Desconhecido'} com texto: "${raw}"`);
     const cats = raw.toLowerCase().split(/[,;]| e /).map(s => s.trim()).filter(Boolean);
     if (!cats.length) return;
     const r = await this.messages.suggestionsForCategories(String(ctx.from?.id ?? 'anon'), cats);
     await ctx.reply(r.text);
   }
 
-  // 5) Limite: "limite Uber 50"
   @Hears(/^\s*limite\s+(.+?)\s+(\d+[\.,]?\d*)\s*$/i)
   async limit(@Ctx() ctx: Context) {
     const text = (ctx.message as any).text as string;
-    console.log('>> limit raw', { text });
+    // CORRIGIDO AQUI
+    this.logger.log(`Comando 'limit' acionado por ${ctx.from?.id ?? 'ID_Desconhecido'} com texto: "${text}"`);
     const match = text.match(/^\s*limite\s+(.+?)\s+(\d+[\.,]?\d*)\s*$/i);
     if (!match) return ctx.reply('Use "limite <categoria/serviço> <valor>", ex.: "limite Uber 50"');
     const target = match[1].trim();
@@ -68,13 +83,39 @@ export class TelegramUpdate {
     await ctx.reply(r.text);
   }
 
-  // 6) Fallback: loga tudo para debugging
+  // Comando de análise de extrato com IA
+  @Hears(['analise meu extrato', 'analisar extrato'])
+  async analyzeStatement(@Ctx() ctx: Context) {
+    // Já estava correto aqui
+    const userId = String(ctx.from?.id ?? 'anon');
+    this.logger.log(`Comando 'analyzeStatement' acionado por ${userId}`);
+    await ctx.reply('Ok! Analisando seu extrato, isso pode levar um momento...');
+    await ctx.replyWithChatAction('typing');
+
+    try {
+      const analysisResult = await this.statementService.getStatementAnalysis(userId);
+      await ctx.reply(analysisResult);
+    } catch (error) {
+      this.logger.error('Erro no fluxo de análise de extrato', error);
+      await ctx.reply('Desculpe, encontrei um erro ao tentar analisar seu extrato.');
+    }
+  }
+
+  // Fallback conversacional com IA
   @On('text')
   async fallback(@Ctx() ctx: Context) {
+    // Já estava correto aqui
     const text = (ctx.message as any)?.text;
-    console.log('>> Fallback text received:', JSON.stringify(text));
-    await ctx.reply(
-      'Não entendi 🤔 Tente:\n• "feche meu mês"\n• "analisar onde economizar"\n• "guardar 60 na caixinha"\n• "limite Uber 50"'
-    );
+    const userId = String(ctx.from?.id ?? 'anon');
+    this.logger.log(`Fallback acionado por ${userId} com o texto: "${text}"`);
+
+    try {
+        await ctx.replyWithChatAction('typing');
+        const response = await this.openaiService.getChatResponse(text, userId);
+        await ctx.reply(response);
+    } catch (error) {
+        this.logger.error('Erro ao chamar a OpenAI no fallback:', error);
+        await ctx.reply('Desculpe, não consegui processar sua pergunta no momento.');
+    }
   }
 }

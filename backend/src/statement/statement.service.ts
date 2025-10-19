@@ -1,32 +1,39 @@
-import { Injectable } from '@nestjs/common';
-import { Statement } from './statement.types';
+// src/statement/statement.service.ts
+import { Injectable, Logger } from '@nestjs/common';
+import { OpenaiService } from '../openai/openai.service';
+import * as fs from 'fs';
+import * as path from 'path';
+import { BankStatement } from './statement.types';
 
 @Injectable()
 export class StatementService {
-  parseMonthRef(statement: Statement) {
-    const start = statement.bankStatement.period.startDate; // ex "2025-10-01"
-    return start.slice(0, 7); // "2025-10"
-  }
+  private readonly logger = new Logger(StatementService.name);
 
-  sumByCategory(statement: Statement) {
-    const tx = statement.bankStatement.transactions;
-    const totalSpent = tx.filter(t => this.isExpense(t.category)).reduce((a, t) => a + t.amount, 0);
-    const byCat = new Map<string, number>();
-    for (const t of tx) {
-      if (!this.isExpense(t.category)) continue;
-      byCat.set(t.category, (byCat.get(t.category) ?? 0) + t.amount);
+  constructor(private readonly openaiService: OpenaiService) {}
+
+  public async getStatementAnalysis(userId: string): Promise<string> {
+    this.logger.log(`Iniciando análise de extrato para o usuário ${userId}`);
+
+    // 1. Lê o arquivo JSON do seu projeto
+    // (Para um sistema real, você faria o upload do arquivo)
+    const filePath = path.join(__dirname, '..', '..', 'extrato.json');
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const statementData = JSON.parse(fileContent);
+    const transactions = statementData.bankStatement.transactions;
+
+    if (!transactions || transactions.length === 0) {
+      return 'Não encontrei transações no seu extrato.';
     }
-    const byCategory = [...byCat.entries()].map(([name, amount]) => ({
-      name,
-      amount,
-      pct: totalSpent ? Math.round((amount / totalSpent) * 100) : 0,
-    }));
-    return { totalSpent, byCategory };
-  }
 
-  private isExpense(cat: string) {
-    // trate aqui categorias de renda/recebimentos para não contar como gasto
-    const income = new Set(['Transferência Recebida', 'Rendimento']);
-    return !income.has(cat);
+    // 2. Formata as transações como um texto simples para a IA entender
+    const transactionsText = transactions
+      .filter((t: any) => t.category.toLowerCase().includes('enviada') === false && t.category.toLowerCase().includes('recebida') === false && t.category.toLowerCase().includes('rendimento') === false) // Filtra apenas despesas
+      .map((t: any) => `- ${t.date}: ${t.merchant || t.category} - R$ ${t.amount.toFixed(2)}`)
+      .join('\n');
+
+    // 3. Chama o novo método de análise no OpenaiService
+    const analysis = await this.openaiService.getStatementAnalysis(transactionsText);
+
+    return analysis;
   }
 }

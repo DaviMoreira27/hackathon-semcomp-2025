@@ -1,30 +1,38 @@
-// app.module.ts (exemplo)
+// src/app.module.ts
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import config from './config/config';
-import { HttpModule } from '@nestjs/axios';
-
+import { ConfigModule } from '@nestjs/config'; // <-- Importação principal
 import { DatabaseModule } from './database/database.module';
+import { MessageModule } from './message/message.module';
+import { OpenaiModule } from './openai/openai.module';
+import { TelegramModule } from './telegram/telegram.module';
 import { BudgetModule } from './budget/budget.module';
 import { PiggyModule } from './piggy/piggy.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { AlertModule } from './alert/alert.module';
-import { MessageModule } from './message/message.module';
-import { OpenaiModule } from './openai/openai.module';
-import { TelegramModule } from './telegram/telegram.module';
+import { StatementModule } from './statement/statement.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, load: [config] }),
-    HttpModule.register({ timeout: 20000, maxRedirects: 5 }),
+    // 1. O ConfigModule DEVE ser o primeiro da lista.
+    //    A opção isGlobal: true faz com que as variáveis do .env
+    //    fiquem disponíveis para todos os outros módulos sem
+    //    precisar importar o ConfigModule em cada um deles.
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+
+    // 2. Todos os outros módulos vêm DEPOIS.
     DatabaseModule,
+    MessageModule,
+    OpenaiModule,
+    TelegramModule,
     BudgetModule,
     PiggyModule,
     SubscriptionModule,
     AlertModule,
-    MessageModule,
-    OpenaiModule,
-    TelegramModule,
+    StatementModule,
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

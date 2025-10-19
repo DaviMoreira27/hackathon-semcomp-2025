@@ -7,20 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ScopeType {
-  CATEGORY
-  MERCHANT
+enum Periodicity {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
 }
 
 enum AlertType {
-  NEAR_LIMIT
-  HIT_LIMIT
+  BUDGET_EXCEEDED
   SUBSCRIPTION_DUE
+  PIGGY_BANK_GOAL
 }
 
-enum Periodicity {
-  MONTHLY
-  UNKNOWN
+enum ScopeType {
+  TOTAL
+  CATEGORY
+  MERCHANT
 }
 
 model User {

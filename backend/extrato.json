@@ -1,0 +1,310 @@
+{
+  "bankStatement": {
+    "account": {
+      "bankName": "btg Pactual",
+      "branch": "1234-5",
+      "accountNumber": "98765-4",
+      "accountHolder": "Lucas Michael",
+      "accountType": "Conta Corrente",
+      "currency": "BRL"
+    },
+    "period": {
+      "startDate": "2025-10-01",
+      "endDate": "2025-10-31"
+    },
+    "balance": {
+      "openingBalance": 2530.75,
+      "closingBalance": 3178.20
+    },
+    "transactions": [
+      {
+        "date": "2025-10-02",
+        "category": "Transferência Recebida",
+        "amount": 500.00,
+        "balanceAfter": 3030.75,
+        "counterparty": "Carlos Andrade"
+      },
+      {
+        "date": "2025-10-05",
+        "category": "Alimentação",
+        "amount": 123.45,
+        "balanceAfter": 2907.30,
+        "merchant": "Restaurante Sabor & Cia"
+      },
+      {
+        "date": "2025-10-08",
+        "category": "Transferência Enviada",
+        "amount": 200.00,
+        "balanceAfter": 2707.30,
+        "counterparty": "Ana Beatriz"
+      },
+      {
+        "date": "2025-10-12",
+        "category": "Rendimento",
+        "amount": 1200.00,
+        "balanceAfter": 3907.30,
+        "source": "Caixinha CDI (BTG)"
+      },
+      {
+        "date": "2025-10-15",
+        "category": "Contas Domésticas",
+        "amount": 229.10,
+        "balanceAfter": 3678.20,
+        "merchant": "Enel Energia"
+      },
+      {
+        "date": "2025-10-18",
+        "category": "Lazer",
+        "amount": 500.00,
+        "balanceAfter": 3178.20,
+        "merchant": "Eventim (Ingressos)"
+      },
+      {
+        "date": "2025-10-03",
+        "category": "Alimentação",
+        "amount": 50.00,
+        "balanceAfter": 3128.20,
+        "merchant": "Padaria do Centro"
+      },
+      {
+        "date": "2025-10-04",
+        "category": "Transporte",
+        "amount": 30.00,
+        "balanceAfter": 3098.20,
+        "merchant": "Uber"
+      },
+      {
+        "date": "2025-10-05",
+        "category": "Saúde",
+        "amount": 200.00,
+        "balanceAfter": 2898.20,
+        "merchant": "Drogasil"
+      },
+      {
+        "date": "2025-10-06",
+        "category": "Compras",
+        "amount": 150.00,
+        "balanceAfter": 2748.20,
+        "merchant": "Mercado Livre"
+      },
+      {
+        "date": "2025-10-07",
+        "category": "Alimentação",
+        "amount": 80.00,
+        "balanceAfter": 2668.20,
+        "merchant": "iFood"
+      },
+      {
+        "date": "2025-10-09",
+        "category": "Transporte",
+        "amount": 40.00,
+        "balanceAfter": 2628.20,
+        "merchant": "99"
+      },
+      {
+        "date": "2025-10-10",
+        "category": "Lazer",
+        "amount": 100.00,
+        "balanceAfter": 2528.20,
+        "merchant": "Cinemark"
+      },
+      {
+        "date": "2025-10-11",
+        "category": "Alimentação",
+        "amount": 60.00,
+        "balanceAfter": 2468.20,
+        "merchant": "Burger King"
+      },
+      {
+        "date": "2025-10-13",
+        "category": "Contas Domésticas",
+        "amount": 180.00,
+        "balanceAfter": 2288.20,
+        "merchant": "Sabesp"
+      },
+      {
+        "date": "2025-10-14",
+        "category": "Compras",
+        "amount": 250.00,
+        "balanceAfter": 2038.20,
+        "merchant": "Amazon"
+      },
+      {
+        "date": "2025-10-16",
+        "category": "Transporte",
+        "amount": 35.00,
+        "balanceAfter": 2003.20,
+        "merchant": "Uber"
+      },
+      {
+        "date": "2025-10-17",
+        "category": "Saúde",
+        "amount": 120.00,
+        "balanceAfter": 1883.20,
+        "merchant": "Clínica Vida"
+      },
+      {
+        "date": "2025-10-18",
+        "category": "Alimentação",
+        "amount": 70.00,
+        "balanceAfter": 1813.20,
+        "merchant": "Outback"
+      },
+      {
+        "date": "2025-10-19",
+        "category": "Lazer",
+        "amount": 90.00,
+        "balanceAfter": 1723.20,
+        "merchant": "Parque da Cidade"
+      },
+      {
+        "date": "2025-10-20",
+        "category": "Compras",
+        "amount": 200.00,
+        "balanceAfter": 1523.20,
+        "merchant": "Americanas"
+      },
+      {
+        "date": "2025-10-21",
+        "category": "Alimentação",
+        "amount": 110.00,
+        "balanceAfter": 1413.20,
+        "merchant": "Supermercado Bom Preço"
+      },
+      {
+        "date": "2025-10-22",
+        "category": "Contas Domésticas",
+        "amount": 90.00,
+        "balanceAfter": 1323.20,
+        "merchant": "Vivo Internet"
+      },
+      {
+        "date": "2025-10-23",
+        "category": "Transporte",
+        "amount": 50.00,
+        "balanceAfter": 1273.20,
+        "merchant": "99"
+      },
+      {
+        "date": "2025-10-24",
+        "category": "Saúde",
+        "amount": 75.00,
+        "balanceAfter": 1198.20,
+        "merchant": "Farmácia Pague Menos"
+      },
+      {
+        "date": "2025-10-25",
+        "category": "Alimentação",
+        "amount": 60.00,
+        "balanceAfter": 1138.20,
+        "merchant": "Subway"
+      },
+      {
+        "date": "2025-10-26",
+        "category": "Lazer",
+        "amount": 120.00,
+        "balanceAfter": 1018.20,
+        "merchant": "Boliche Strike"
+      },
+      {
+        "date": "2025-10-27",
+        "category": "Compras",
+        "amount": 150.00,
+        "balanceAfter": 868.20,
+        "merchant": "Decathlon"
+      },
+      {
+        "date": "2025-10-28",
+        "category": "Alimentação",
+        "amount": 80.00,
+        "balanceAfter": 788.20,
+        "merchant": "Habib's"
+      },
+      {
+        "date": "2025-10-29",
+        "category": "Transporte",
+        "amount": 45.00,
+        "balanceAfter": 743.20,
+        "merchant": "Uber"
+      },
+      {
+        "date": "2025-10-30",
+        "category": "Saúde",
+        "amount": 100.00,
+        "balanceAfter": 643.20,
+        "merchant": "Laboratório Hermes Pardini"
+      },
+      {
+        "date": "2025-10-31",
+        "category": "Lazer",
+        "amount": 90.00,
+        "balanceAfter": 553.20,
+        "merchant": "Steam"
+      },
+      {
+        "date": "2025-11-01",
+        "category": "Alimentação",
+        "amount": 50.00,
+        "balanceAfter": 503.20,
+        "merchant": "Padaria Flor do Trigo"
+      },
+      {
+        "date": "2025-11-02",
+        "category": "Compras",
+        "amount": 200.00,
+        "balanceAfter": 303.20,
+        "merchant": "Magazine Luiza"
+      },
+      {
+        "date": "2025-11-03",
+        "category": "Contas Domésticas",
+        "amount": 100.00,
+        "balanceAfter": 203.20,
+        "merchant": "Enel Energia"
+      },
+      {
+        "date": "2025-11-04",
+        "category": "Transporte",
+        "amount": 30.00,
+        "balanceAfter": 173.20,
+        "merchant": "99"
+      },
+      {
+        "date": "2025-11-05",
+        "category": "Saúde",
+        "amount": 50.00,
+        "balanceAfter": 123.20,
+        "merchant": "Drogaria São Paulo"
+      },
+      {
+        "date": "2025-11-06",
+        "category": "Alimentação",
+        "amount": 60.00,
+        "balanceAfter": 63.20,
+        "merchant": "iFood"
+      },
+      {
+        "date": "2025-11-07",
+        "category": "Lazer",
+        "amount": 40.00,
+        "balanceAfter": 23.20,
+        "merchant": "Netflix"
+      },
+      {
+        "date": "2025-11-08",
+        "category": "Compras",
+        "amount": 20.00,
+        "balanceAfter": 3.20,
+        "merchant": "Shopee"
+      },
+      {
+        "date": "2025-11-09",
+        "category": "Contas Domésticas",
+        "amount": 3.20,
+        "balanceAfter": 0.00,
+        "merchant": "Taxa de Iluminação Pública"
+      }
+    ]
+  }
+}
+
