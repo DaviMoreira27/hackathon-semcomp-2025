@@ -9,7 +9,7 @@ npm install
 # 3. Execute o Prisma
 npx prisma generate
 
-# Inicia o servidor em modo de observação (reinicia automaticamente ao salvar alterações)
+# 4. Inicie o servidor em modo de observação
 npm run start:dev
 
 No Telegram, envie o comando /start para receber a mensagem de boas-vindas.
