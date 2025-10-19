@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Periodicity {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum AlertType {
+  BUDGET_EXCEEDED
+  SUBSCRIPTION_DUE
+  PIGGY_BANK_GOAL
+}
+
+enum ScopeType {
+  TOTAL
+  CATEGORY
+  MERCHANT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  chatId    String   @unique
+  createdAt DateTime @default(now())
+
+  budgets   Budget[]
+  alerts    Alert[]
+  piggy     PiggyLedger[]
+  subs      Subscription[]
+  // opcional: snapshots de extratos processados
+  statements StatementMonth[]
+}
+
+model Budget {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  scopeType  ScopeType
+  scopeKey   String    // "Lazer" (categoria) ou "Uber" (merchant)
+  limitAmount Float
+  createdAt  DateTime  @default(now())
+  isActive   Boolean   @default(true)
+  // opcional: mês de referência; se null = recorrente
+  monthRef   String?   // "2025-10"
+  @@unique([userId, scopeType, scopeKey, monthRef])
+}
+
+model Alert {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  type      AlertType
+  payload   Json
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  scheduledAt DateTime?
+  sentAt    DateTime?
+}
+
+model PiggyLedger {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Float
+  createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  merchant        String
+  lastChargeDate  DateTime
+  periodicity     Periodicity @default(MONTHLY)
+  periodicityDays Int?        // ex. 30 se inferido
+  isActive        Boolean     @default(true)
+
+  @@unique([userId, merchant])
+}
+
+model StatementMonth {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  monthRef    String   // "2025-10"
+  currency    String
+  totalSpent  Float
+  totalIncome Float
+  // agregados por categoria p/ resposta rápida
+  byCategory  Json
+
+  createdAt   DateTime @default(now())
+  @@unique([userId, monthRef])
+}

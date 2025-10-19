@@ -1,12 +1,18 @@
 import { Module } from '@nestjs/common';
-import { MessageController } from './message.controller';
 import { MessageService } from './message.service';
-import { ConfigService } from '@nestjs/config';
+import { PiggyModule } from '../piggy/piggy.module';
+import { BudgetModule } from '../budget/budget.module';
+import { OpenaiModule } from '../openai/openai.module';
+import { StatementModule } from '../statement/statement.module';
 
 @Module({
-  imports: [],
-  providers: [MessageService, ConfigService],
-  controllers: [MessageController],
-  exports: [],
+  imports: [
+    PiggyModule,
+    BudgetModule,     // <-- importa para disponibilizar BudgetService
+    OpenaiModule,
+    StatementModule,
+  ],
+  providers: [MessageService],
+  exports: [MessageService],
 })
 export class MessageModule {}

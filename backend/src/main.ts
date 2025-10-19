@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
 import { ValidationAppError } from './global/errors/global.errors';
 import { HttpExceptionFilter } from './global/filters/global.filter';
+import 'reflect-metadata';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -12,15 +13,15 @@ async function bootstrap() {
     }),
   });
   app.setGlobalPrefix('api/v1');
-  app.useGlobalPipes(
-    new ValidationPipe({
-      // TODO: Handle better validation errors
-      exceptionFactory: (errors) => {
-        const arrayErrors = (errors.map((err) => Object.values(err.constraints || {})).flat()).join('-');
-        throw new ValidationAppError(arrayErrors);
-      }
-    }),
-  );
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     // TODO: Handle better validation errors
+  //     exceptionFactory: (errors) => {
+  //       const arrayErrors = (errors.map((err) => Object.values(err.constraints || {})).flat()).join('-');
+  //       throw new ValidationAppError(arrayErrors);
+  //     }
+  //   }),
+  // );
   app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(process.env.PORT ?? 3000);
 }

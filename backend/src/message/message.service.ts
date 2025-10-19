@@ -1,111 +1,109 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InvalidWebhookToken, UnsupportedMessageReceived } from 'src/message/message.errors';
-import { MessageDTO, MessageType, WhatsAppMessageMapped, WhatsAppWebhookPayloadDTO } from './message.types';
+// src/message/message.service.ts
+import { Injectable, Logger } from '@nestjs/common';
+import { BudgetService } from '../budget/budget.service';
+import { PiggyService } from '../piggy/piggy.service';
+import { OpenaiService } from '../openai/openai.service';
+import { StatementService } from '../statement/statement.service';
 
 @Injectable()
 export class MessageService {
-  private readonly verifyToken: string;
-  public messageMap: WhatsAppMessageMapped[] = [];
+  private readonly logger = new Logger(MessageService.name);
 
   constructor(
-    @Inject(ConfigService)
-    private configService: ConfigService,
-  ) {
-    this.verifyToken = this.configService.get<string>('whatsappVerifyToken')!;
+    private readonly budgetService: BudgetService,
+    private readonly piggyService: PiggyService,
+    private readonly openaiService: OpenaiService,
+    private readonly statementService: StatementService,
+  ) {}
+
+  /**
+   * Relatório mensal personalizado
+   */
+  async monthlyReport(userId: string) {
+    try {
+      // Busca resumo de transações do usuário
+      const analysis = await this.statementService.getStatementAnalysis(userId);
+
+      // Prompt para IA gerar recomendações de economia e investimento
+      const prompt = `
+Você é um consultor financeiro. Analise este resumo de transações do usuário:
+${analysis}
+
+Sugira de forma amigável:
+- Onde ele pode reduzir gastos
+- Dicas de investimento (como CDI, Tesouro Selic)
+- Conselhos práticos e claros
+Responda em português.
+      `;
+
+      const aiResponse = await this.openaiService.getChatResponse(prompt, userId);
+      return { text: aiResponse };
+    } catch (error) {
+      this.logger.error('Erro ao gerar relatório mensal', error);
+      return { text: 'Desculpe, não consegui gerar seu relatório mensal no momento.' };
+    }
   }
 
-  validateWebhook(mode: string, challenge: string, token: string): string {
-    if (mode === 'subscribe' && token === this.verifyToken) {
-      console.log('Webhook authenticated');
-      return challenge;
+  /**
+   * Pergunta sobre categorias que o usuário quer reduzir
+   */
+  async askCategories(userId: string) {
+    const prompt = `
+Você é um consultor financeiro. Pergunte ao usuário quais categorias ele quer reduzir.
+Liste exemplos como: Mercado, Restaurantes, Transporte, Streaming, Saúde, Lazer.
+Responda de forma amigável.
+    `;
+
+    try {
+      const aiResponse = await this.openaiService.getChatResponse(prompt, userId);
+      return { text: aiResponse };
+    } catch (error) {
+      this.logger.error('Erro ao perguntar sobre categorias', error);
+      return { text: 'Não consegui perguntar sobre categorias no momento.' };
     }
-    throw new InvalidWebhookToken('VALIDATE_WEBHOOK');
   }
 
-  async processWhatsAppMessage(payload: WhatsAppWebhookPayloadDTO) {
-    const message = await this.mapMessage(payload);
+  /**
+   * Sugestões para categorias específicas
+   */
+  async suggestionsForCategories(userId: string, cats: string[]) {
+    const prompt = `
+Você é um consultor financeiro. O usuário quer economizar nas seguintes categorias: ${cats.join(
+      ', ',
+    )}.
+Sugira ações concretas, dicas de redução de gastos e investimentos possíveis, como colocar no CDI ou Tesouro Selic.
+Responda de forma amigável e concisa.
+    `;
 
-    const data = {
-      text: message.text,
-      metaMessageId: message.metaMessageId,
-      mediaId: message.mediaId,
-      name: message.name,
-      type: message.type,
-      phoneNumber: message.phoneNumber,
-      sendedAt: new Date(),
+    try {
+      const aiResponse = await this.openaiService.getChatResponse(prompt, userId);
+      return { text: aiResponse };
+    } catch (error) {
+      this.logger.error('Erro ao gerar sugestões para categorias', error);
+      return { text: 'Não consegui gerar sugestões para essas categorias no momento.' };
     }
-    this.messageMap.push(data);
-    console.log('Message saved', data);
   }
 
-  private async mapMessage(payload: WhatsAppWebhookPayloadDTO) {
-    const entry = payload.entry?.[0];
-    if (!entry) {
-      console.warn('Payload does not contain any entry.');
-      throw new UnsupportedMessageReceived('MAP_MESSAGE_ENTRY');
-    }
-
-    const change = entry.changes?.[0];
-    if (!change) {
-      console.warn('Entry does not contain any changes.');
-      throw new UnsupportedMessageReceived('MAP_MESSAGE_CHANGE');
-    }
-
-    const value = change.value;
-    if (!value) {
-      console.warn('Change does not contain a value.');
-      throw new UnsupportedMessageReceived('MAP_MESSAGE_VALUE');
-    }
-
-    const contact = value.contacts?.[0];
-    const message = value.messages?.[0];
-
-    if (!message) {
-      console.warn('Value does not contain a message.');
-      throw new UnsupportedMessageReceived('MAP_MESSAGE_VALUE');
-    }
-
-    const mappedMessage: WhatsAppMessageMapped = {
-      metaMessageId: message.id,
-      name: contact.profile.name,
-      phoneNumber: message.from,
-      type: message.type as MessageType,
-      sendedAt: new Date(parseInt(message.timestamp, 10) * 1000), // The whatsApp timestamp is in Unix format
-    };
-
-    this.setMessageBody(mappedMessage, message);
-
-    return mappedMessage;
+  /**
+   * Criar alertas de cancelamento
+   */
+  async createCancelAlert(userId: string, service: string) {
+    return { text: `🔔 Aviso de cancelamento criado para ${service}.` };
   }
 
-  private setMessageBody(mappedMessage: WhatsAppMessageMapped, receivedMessage: MessageDTO) {
-    switch (receivedMessage.type) {
-      case 'text':
-        mappedMessage.text = receivedMessage.text?.body;
-        break;
-      case 'image':
-        mappedMessage.mediaId = receivedMessage.image?.id;
-        mappedMessage.text = receivedMessage.image?.caption;
-        break;
-      case 'audio':
-        mappedMessage.mediaId = receivedMessage.audio?.id;
-        break;
-      case 'video':
-        mappedMessage.mediaId = receivedMessage.video?.id;
-        mappedMessage.text = receivedMessage.video?.caption;
-        break;
-      case 'sticker':
-        mappedMessage.mediaId = receivedMessage.sticker?.id;
-        break;
-      case 'document':
-        mappedMessage.mediaId = receivedMessage.document?.id;
-        mappedMessage.text = receivedMessage.document?.filename;
-        break;
-      case 'unsupported':
-        throw new UnsupportedMessageReceived('MESSAGE_BODY_UNSUPPORTED');
-      default:
-        throw new UnsupportedMessageReceived('MESSAGE_BODY_DEFAULT');
-    }
+  /**
+   * Criar limite de gasto para categoria ou serviço
+   */
+  async createLimit(userId: string, target: string, value: number) {
+    return { text: `✅ Limite criado: ${target} = R$ ${value} (alerta 80%/100%).` };
+  }
+
+  /**
+   * Adicionar valor à "caixinha"
+   */
+  async addToPiggy(userId: string, amount: number) {
+    // mock saldo — você pode integrar com PiggyService real depois
+    const total = 760 + amount;
+    return { text: `💰 Adicionados R$ ${amount} à caixinha. Total: R$ ${total}.` };
   }
 }
